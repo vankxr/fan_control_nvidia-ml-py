@@ -10,38 +10,45 @@ from utils.logging import init_root_logger, get_logger
 
 
 def main():
-  # parse command line options
   args = cmd_parser()
 
-  # get logger
+  config = load_yaml(args.config)
+
   init_root_logger(args.log_level == logging.DEBUG)
   logger = get_logger("main", args.log_level)
   logger.debug(args)
 
-  # load fan speed profile (TODO: check if profile is valid)
-  speed_profile = load_yaml(args.profile)
-  check_speed_profile(speed_profile)
+  logger.info(f"Expecting {len(config['gpus'])} GPUs.")
 
   # initialize nvidia management lib
   nvml.nvmlInit()
 
   # initialize devices
   logger.info(f"Driver Version: {nvml.nvmlSystemGetDriverVersion()}")
-  li_devices = []
+  gpus = []
   for i in range(nvml.nvmlDeviceGetCount()):
-    device = Device(i, speed_profile, args.log_level)
-    li_devices.append(device)
+    if i not in config["gpus"]:
+      logger.debug(f"GPU {i} is not in the config file.")
+      continue
+
+    try:
+      device = Device(i, config["gpus"][i], args.temp_avg_cnt, args.log_level)
+      gpus.append(device)
+    except RuntimeError as e:
+      logger.warning(f"GPU {i} initialization failed: {e}")
+      continue
+
 
   # fan control service (reset to default upon exit)
   try:
     while True:
-      for device in li_devices:
+      for device in gpus:
         device.control()
       time.sleep(args.control_interval)
 
   finally:
     logger.info("Reset to the default fan control policy!")
-    for device in li_devices:
+    for device in gpus:
       device.reset_to_default_policy()
 
   # end nvidia management lib

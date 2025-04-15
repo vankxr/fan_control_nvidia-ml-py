@@ -4,13 +4,13 @@ import pathlib
 
 # Directory structure
 REPO_NAME = "fan_control_nvidia-ml-py"
-WORK_DIR = os.path.join(pathlib.Path.home(), '.' + REPO_NAME)
+WORK_DIR = os.getcwd()
 LOG_DIR = os.path.join(WORK_DIR, "logs")
-PROFILE_DIR = os.path.join(WORK_DIR, "profiles")
-DEFAULT_PROFILE_FILE = os.path.join(PROFILE_DIR, "default.yml")
+DEFAULT_CONFIG_FILE = os.path.join(WORK_DIR, "config.yml")
 
 # Fan control related
 DEFAULT_CTRL_INTERVAL_SEC = 1.0  # seconds
+DEFAULT_TEMP_AVG_CNT = 5  # number of samples to average
 
 # Log related
 LOG_FILENAME = "fan_speed.log"

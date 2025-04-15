@@ -1,0 +1,23 @@
+
+# mode = 0 (GPU Fan), 1 (PWM header on motherboard)
+# Profile Format: <temperature>: <speed %>
+
+gpus:
+  0:
+    mode: 1
+    pwm:
+      path: "/sys/class/hwmon/hwmon2/pwm2"
+      min: 0
+      max: 100
+    profile:
+      0: 30
+      60: 40
+      80: 85
+      85: 100
+  1:
+    mode: 0
+    profile:
+      0: 30
+      60: 40
+      80: 85
+      85: 100
